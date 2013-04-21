@@ -5,7 +5,7 @@ Puppet::Type.type(:selinux_fcontext).provide(:semanage) do
 
   mk_resource_methods
 
-  class_variable_set(:@@filetype_arg_map, {
+  @filetype_arg_map = {
     ''                 => '',
     'all files'        => '',
     '--'               => '--',
@@ -22,7 +22,7 @@ Puppet::Type.type(:selinux_fcontext).provide(:semanage) do
     'symbolic link'    => '-l',
     '-p'               => '-p',
     'named pipe'       => '-p',
-  })
+  }
 
   def self.prefetch(resources)
     found = {}
@@ -72,11 +72,7 @@ Puppet::Type.type(:selinux_fcontext).provide(:semanage) do
 
   private
     def do_create
-      optargs = []
-      optargs << '-f' << @@filetype_arg_map[filetype] if filetype
-      optargs << '-r' << resource[:selrange] if resource[:selrange]
-      optargs << '-s' << resource[:seluser] if resource[:seluser]
-      semanage 'fcontext', '-a', '-t', resource[:seltype], optargs, name
+      semanage 'fcontext', '-a', map_args, name
       self.ensure = :present
     end
 
@@ -86,12 +82,15 @@ Puppet::Type.type(:selinux_fcontext).provide(:semanage) do
     end
 
     def do_update
+      semanage 'fcontext', '-m', map_args, name
+    end
+
+    def map_args
       optargs = []
-      optargs << '-f' << @@filetype_arg_map[resource[:filetype]] if resource[:filetype]
+      optargs << '-f' << @filetype_arg_map[resource[:filetype]] if resource[:filetype]
       optargs << '-r' << resource[:selrange] if resource[:selrange]
       optargs << '-t' << resource[:seltype] if resource[:seltype]
       optargs << '-s' << resource[:seluser] if resource[:seluser]
-      semanage 'fcontext', '-m', optargs, name
+      return optargs
     end
-
 end
