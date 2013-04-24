@@ -1,4 +1,5 @@
-# puppet apply --noop --modulepath='..' tests/selinux_port.pp
+# Make sure you have semanage command available
+# sudo puppet apply --noop --modulepath='..' tests/selinux_port.pp
 
 selinux_port {'udp/53':
   seltype => 'dns_port_t'

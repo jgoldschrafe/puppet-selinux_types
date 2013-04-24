@@ -41,3 +41,38 @@ selinux_port { 'udp/53':
 }
 ```
 
+Purge all network port type definitions that are not managed by puppet:
+```puppet
+resource { 'selinux_port':
+  purge => true,
+}
+```
+
+selinux_permissive_domain
+----------------
+
+Create or deletes the SELinux processes type enforcement mode.
+
+Example:
+
+Change apache to a permissive domain
+```puppet
+selinux_permissive_domain { 'httpd_t':
+  ensure => 'present',
+}
+```
+
+Remove apache from permissive domains
+```puppet
+selinux_permissive_domain { 'httpd_t':
+  ensure => 'absent',
+}
+```
+
+Purge all permissive domains that are not managed by puppet:
+Note: Rather not useful right now, as you can not currently remove permissive domains if they are the built-in into policy.
+```puppet
+resource { 'selinux_permissive_domain':
+  purge => true,
+}
+```
