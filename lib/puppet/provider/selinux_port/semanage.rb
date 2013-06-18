@@ -5,6 +5,9 @@ Puppet::Type.type(:selinux_port).provide(:semanage) do
 
   mk_resource_methods
 
+  Puppet::Util::Log.level = :debug
+  Puppet::Util::Log.newdestination(:console)
+
   def self.instances
     types = []
     out = semanage('port', '-nl')
@@ -30,24 +33,35 @@ Puppet::Type.type(:selinux_port).provide(:semanage) do
       end
     end
   end
-
-  def create
+  
+    def create
+    Puppet.debug 'Running SELinux port create'
     fail "Semanage port #{resource[:name]} requires seltype parameter" unless resource[:seltype]
-    semanage "port", "-a", "-t", resource[:seltype], "-p", resource[:proto], resource[:port]
+    Puppet.debug "Running checkport with /usr/sbin/semanage port --list | /bin/grep #{resource[:proto]} | /bin/grep #{resource[:port]}"
+    checkport = `/usr/sbin/semanage port --list | /bin/grep #{resource[:proto]} | grep #{resource[:port]}`
+    exit = $?
+    Puppet.warning exit
+    if exit == 0
+      semanage "port", "-m", "-t", resource[:seltype], "-p", resource[:proto], resource[:port]
+    else
+      semanage "port", "-a", "-t", resource[:seltype], "-p", resource[:proto], resource[:port]
+    end
     @property_hash[:ensure] = :present
   end
 
   def destroy
-    semanage "port", "-d", "-p", resource[:proto], resource[:port]
+    Puppet.debug 'Running SELinux port destroy'
+    semanage "port", "-d", "-t", resource[:seltype], "-p", resource[:proto], resource[:port]
     @property_hash.clear
   end
 
   def exists?
-    @property_hash[:ensure] == :present
+    Puppet.debug 'Running SELinux port exists'
+    @property_hash[:ensure] != :absent
   end
 
   def seltype=(value)
-    semanage "port", "-m", "-t", value, "-p", resource[:proto], resource[:port]
+    Puppet.debug 'Running SELinux port modify'
     @property_hash[:seltype] = value
   end
 
