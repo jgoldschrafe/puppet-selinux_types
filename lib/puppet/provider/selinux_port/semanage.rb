@@ -7,7 +7,7 @@ Puppet::Type.type(:selinux_port).provide(:semanage) do
 
   def self.instances
     types = []
-    out = semanage('port', '-nl')
+    out = %x[#{command(:semanage)} port -nl]
     out.split("\n").collect do |line|
       type, proto, ports = line.strip.squeeze(" ").split(" ",3)
       ports.gsub(/\s+/, "").split(',').each do |port|
