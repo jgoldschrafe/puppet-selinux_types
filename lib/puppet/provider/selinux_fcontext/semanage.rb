@@ -30,6 +30,13 @@ Puppet::Type.type(:selinux_fcontext).provide(:semanage) do
     execpipe("#{command(:semanage)} fcontext -lC") do |out|
       lines = out.readlines[2..-1] || []
       lines.each do |line|
+        # There's two possible sections to the semanage output.
+        # 1. mapping a path to a file context (/foo gets label foo_t)
+        # 2. equivalence mappings (treat /foo like /bar)
+        #
+        # We don't support equivalence mappings yet, so skip those.
+        next unless line =~ /^(.+?)\s+((\w+)\s(\w*)?)\s+(\w+:\w+:\w+:\w+)\s+$/
+
         filespec, filetype, context = line.split(/\s\s+/)
         seluser, selrole, seltype, selrange = context.split(':')
         found[filespec] = { :ensure => :present, :filetype => filetype,
