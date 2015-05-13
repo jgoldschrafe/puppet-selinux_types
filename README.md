@@ -1,3 +1,7 @@
+DEAD REPOSITORY NOTICE
+======================
+I haven't used Puppet in a few years, so I'm not maintaining this anymore. If you'd like to take over this project, drop me a PR directing this repo's readers to your fork.
+
 Usage
 =====
 These types only require that `/usr/sbin/semanage` be installed.
