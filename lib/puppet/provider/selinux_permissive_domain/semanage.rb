@@ -7,7 +7,7 @@ Puppet::Type.type(:selinux_permissive_domain).provide(:semanage) do
 
   def self.instances
     domains = []
-    types = semanage('permissive', '-nl')
+    types = %x[#{command(:semanage)} permissive -nl]
     types.split("\n").collect do |t|
       domains << new(
         :name => t.strip,
