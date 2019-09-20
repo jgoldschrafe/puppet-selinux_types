@@ -30,7 +30,10 @@ Puppet::Type.type(:selinux_fcontext).provide(:semanage) do
     execpipe("#{command(:semanage)} fcontext -lC") do |out|
       lines = out.readlines[2..-1] || []
       lines.each do |line|
-        filespec, filetype, context = line.split(/\s\s+/)
+        args = line.split(/\s+/)
+        filespec = args[0]
+        filetype = args.length == 4 ? args[1..2].join(' ') : args[1]
+        context = args[-1]
         seluser, selrole, seltype, selrange = context.split(':')
         found[filespec] = { :ensure => :present, :filetype => filetype,
                             :selrange => selrange, :seltype => seltype,
